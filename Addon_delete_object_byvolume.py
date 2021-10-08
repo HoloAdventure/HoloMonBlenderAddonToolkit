@@ -1,22 +1,6 @@
 # 定数の定義
-ADDON_TITLE = "Object Delete ByVolume"
 ADDON_COMMONNAME = "holomon_delete_object_byvolume"
 ADDON_OPERATOR_IDNAME = "holomon.decimate_object"
-
-# bl_infoでプラグインに関する情報の定義を行う
-bl_info = {
-    "name": ADDON_TITLE + " Addon by HoloMon",       # プラグイン名
-    "author": "HoloMon",                             # 制作者名
-    "version": (1, 0),                               # バージョン
-    "blender": (2, 90, 0),                           # 動作可能なBlenderバージョン
-    "support": "TESTING",                            # サポートレベル
-    "category": "3D View",                           # カテゴリ名
-    "location": "View3D > Sidebar > HMToolkit",      # ロケーション
-    "description": ADDON_TITLE + "Addon",            # 説明文
-    "location": "",                                  # 機能の位置付け
-    "warning": "",                                   # 注意点やバグ情報
-    "doc_url": "",                                   # ドキュメントURL
-}
 
 # 利用するタイプやメソッドのインポート
 import bpy
@@ -76,7 +60,7 @@ class HOLOMON_PT_holomon_delete_object_byvolume(Panel):
     # パネルの表示順番を定義する
     # 小さい番号のパネルは、大きい番号のパネルの前にデフォルトで順序付けられる
     # デフォルトは 0
-    bl_order = 0
+    bl_order = 1
     # パネルのカテゴリ名称を定義する
     # 3Dビューポートの場合、サイドバーの名称になる
     # デフォルトは名称無し
@@ -262,10 +246,4 @@ def get_volume_object(arg_targetobject:bpy.types.Object) -> float:
     result_volume = target_dimensions[0] * target_dimensions[1] * target_dimensions[2]
 
     return result_volume
-
-# エディター実行時の処理
-if __name__ == "__main__":
-    # 作成クラスと定義を登録する
-    register()
-
 

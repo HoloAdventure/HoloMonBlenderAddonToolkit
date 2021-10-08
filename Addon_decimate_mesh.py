@@ -1,7 +1,6 @@
 # 定数の定義
 ADDON_COMMONNAME = "holomon_decimate_mesh"
 ADDON_OPERATOR_IDNAME = "holomon.decimate_mesh"
-ADDON_OPERATOR_IDNAME_SUB = "holomon.show_status"
 
 # 利用するタイプやメソッドのインポート
 import bpy
@@ -61,7 +60,7 @@ class HOLOMON_PT_holomon_decimate_mesh(Panel):
     # パネルの表示順番を定義する
     # 小さい番号のパネルは、大きい番号のパネルの前にデフォルトで順序付けられる
     # デフォルトは 0
-    bl_order = 1
+    bl_order = 2
     # パネルのカテゴリ名称を定義する
     # 3Dビューポートの場合、サイドバーの名称になる
     # デフォルトは名称無し
@@ -71,10 +70,6 @@ class HOLOMON_PT_holomon_decimate_mesh(Panel):
     def draw(self, context):
         # Operatorをボタンとして配置する
         draw_layout = self.layout
-        # 要素行を作成する
-        line_row = draw_layout.row()
-        # ポリゴン数の表示切替を実行するボタンを配置する
-        line_row.operator(ADDON_OPERATOR_IDNAME_SUB)
         # 要素行を作成する
         line_row = draw_layout.row()
         # 削減後の総ポリゴン数指定用のカスタムプロパティを配置する
@@ -143,55 +138,6 @@ class HOLOMON_OT_holomon_decimate_mesh(Operator):
 
         return {'FINISHED'}
 
-# Operatorクラスの作成（ポリゴン数表示のためのサブ関数）
-# 参考URL:https://docs.blender.org/api/current/bpy.types.Operator.html
-class HOLOMON_OT_holomon_show_status(Operator):
-    # クラスのIDを定義する
-    # (Blender内部で参照する際のIDに利用)
-    bl_idname = ADDON_OPERATOR_IDNAME_SUB
-    # クラスのラベルを定義する
-    # (デフォルトのテキスト表示などに利用)
-    bl_label = "ポリゴン数の表示切替"
-    # クラスの説明文
-    # (マウスオーバー時に表示)
-    bl_description = "3Dビューの統計データ表示を切り替えてポリゴン数を表示します"
-    # クラスの属性
-    # 以下の属性を設定できる
-    #   REGISTER      : Operatorを情報ウィンドウに表示し、やり直しツールバーパネルをサポートする
-    #   UNDO          : 元に戻すイベントをプッシュする（Operatorのやり直しに必要）
-    #   UNDO_GROUPED  : Operatorの繰り返しインスタンスに対して単一の取り消しイベントをプッシュする
-    #   BLOCKING      : 他の操作がマウスポインタ―を使用できないようにブロックする
-    #   MACRO         : Operatorがマクロであるかどうかを確認するために使用する
-    #   GRAB_CURSOR   : 継続的な操作が有効な場合にオペレーターがマウスポインターの動きを参照して、操作を有効にする
-    #   GRAB_CURSOR_X : マウスポインターのX軸の動きのみを参照する
-    #   GRAB_CURSOR_Y : マウスポインターのY軸の動きのみを参照する
-    #   PRESET        : Operator設定を含むプリセットボタンを表示する
-    #   INTERNAL      : 検索結果からOperatorを削除する
-    # 参考URL:https://docs.blender.org/api/current/bpy.types.Operator.html#bpy.types.Operator.bl_options
-    bl_options = {'REGISTER', 'UNDO'}
-
-    # Operator実行時の処理
-    def execute(self, context):
-        # 現在の show_status の状態を切り替える
-        # 参考URL:https://docs.blender.org/api/2.91/bpy.types.SpaceView3D.html
-        # 参考URL:https://docs.blender.org/api/2.91/bpy.types.View3DOverlay.html
-        # アドオンは VIEW_3D パネルで実行されているため space_data のアクセス先は SpaceView3D になる
-        context_overlay = context.space_data.overlay
-        if context_overlay.show_stats:
-            context_overlay.show_stats = False
-        else:
-            context_overlay.show_stats = True
-        
-        # カスタムプロパティから削減後の総ポリゴン数を取得する
-        targettrianglecount = context.scene.holomon_decimate_mesh.prop_targettrianglecount
-        
-        # 削減後の総ポリゴン数をチェックする
-        if targettrianglecount <= 0:
-            # 削減後の総ポリゴン数の指定が 0 以下の時、現在の総ポリゴン数を削減後の総ポリゴン(三角面)数に設定する
-            context.scene.holomon_decimate_mesh.prop_targettrianglecount = count_alltriangles_mesh()
-
-        return {'FINISHED'}
-
 # PropertyGroupクラスの作成
 # 参考URL:https://docs.blender.org/api/current/bpy.types.PropertyGroup.html
 class HOLOMON_PROP_holomon_decimate_mesh(PropertyGroup):
@@ -216,7 +162,6 @@ regist_classes = (
     HOLOMON_PT_holomon_decimate_mesh,
     HOLOMON_OT_holomon_decimate_mesh,
     HOLOMON_PROP_holomon_decimate_mesh,
-    HOLOMON_OT_holomon_show_status,
 )
 
 # 作成クラスと定義の登録メソッド
