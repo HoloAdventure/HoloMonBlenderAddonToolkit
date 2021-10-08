@@ -37,7 +37,7 @@ from bpy.props import PointerProperty, FloatProperty
 class HOLOMON_PT_holomon_delete_object_byvolume(Panel):
     # パネルのラベル名を定義する
     # パネルを折りたたむパネルヘッダーに表示される
-    bl_label = "指定オブジェクトの削除"
+    bl_label = "サイズ指定のオブジェクト削除"
     # クラスのIDを定義する
     # 命名規則は CATEGORY_PT_name
     bl_idname = "HOLOMON_PT_" + ADDON_COMMONNAME
