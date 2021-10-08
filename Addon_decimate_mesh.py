@@ -61,7 +61,7 @@ class HOLOMON_PT_holomon_decimate_mesh(Panel):
     # パネルの表示順番を定義する
     # 小さい番号のパネルは、大きい番号のパネルの前にデフォルトで順序付けられる
     # デフォルトは 0
-    bl_order = 0
+    bl_order = 1
     # パネルのカテゴリ名称を定義する
     # 3Dビューポートの場合、サイドバーの名称になる
     # デフォルトは名称無し
@@ -72,21 +72,21 @@ class HOLOMON_PT_holomon_decimate_mesh(Panel):
         # Operatorをボタンとして配置する
         draw_layout = self.layout
         # 要素行を作成する
-        button_row = draw_layout.row()
+        line_row = draw_layout.row()
         # ポリゴン数の表示切替を実行するボタンを配置する
-        button_row.operator(ADDON_OPERATOR_IDNAME_SUB)
+        line_row.operator(ADDON_OPERATOR_IDNAME_SUB)
         # 要素行を作成する
-        uvlayername_row = draw_layout.row()
+        line_row = draw_layout.row()
         # 削減後の総ポリゴン数指定用のカスタムプロパティを配置する
-        uvlayername_row.prop(context.scene.holomon_decimate_mesh, "prop_targettrianglecount")
+        line_row.prop(context.scene.holomon_decimate_mesh, "prop_targettrianglecount")
         # 要素行を作成する
-        uvlayername_row = draw_layout.row()
+        line_row = draw_layout.row()
         # １メッシュ辺りの最低ポリゴン数指定用のカスタムプロパティを配置する
-        uvlayername_row.prop(context.scene.holomon_decimate_mesh, "prop_mintrianglecount")
+        line_row.prop(context.scene.holomon_decimate_mesh, "prop_mintrianglecount")
         # 要素行を作成する
-        button_row = draw_layout.row()
+        line_row = draw_layout.row()
         # ポリゴン数削減を実行するボタンを配置する
-        button_row.operator(ADDON_OPERATOR_IDNAME)
+        line_row.operator(ADDON_OPERATOR_IDNAME)
 
 # Operatorクラスの作成
 # 参考URL:https://docs.blender.org/api/current/bpy.types.Operator.html
@@ -258,8 +258,8 @@ def apply_decimate_allmeshcount(arg_targettrianglecount:int=10000, arg_mintriang
     if current_trianglecount > arg_targettrianglecount:
         # 指定のポリゴン数まで削減するための比率を計算する
         target_ratio = arg_targettrianglecount / current_trianglecount
-    # 全オブジェクトデータを取得する
-    for obj in bpy.data.objects:
+    # シーン内の全オブジェクトデータを取得する
+    for obj in bpy.context.scene.objects:
         # オブジェクトに反映する削減比率
         obj_ratio = target_ratio
         # オブジェクトのポリゴン数を取得する

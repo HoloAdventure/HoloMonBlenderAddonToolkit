@@ -1,9 +1,12 @@
 # 各種ライブラリインポート
 if "bpy" in locals():
     import importlib
+    if "Addon_delete_object_byvolume" in locals():
+        importlib.reload(Addon_delete_object_byvolume)
     if "Addon_decimate_mesh" in locals():
         importlib.reload(Addon_decimate_mesh)
 import bpy
+from . import Addon_delete_object_byvolume
 from . import Addon_decimate_mesh
 
 # bl_infoでプラグインに関する情報の定義を行う
@@ -24,10 +27,12 @@ bl_info = {
 # 作成クラスと定義の登録メソッド
 def register():
     # 各アドオンの登録メソッドを呼び出す
+    Addon_delete_object_byvolume.register()
     Addon_decimate_mesh.register()
 # 作成クラスと定義の登録解除メソッド
 def unregister():
     # 各アドオンの登録解除メソッドを呼び出す
+    Addon_delete_object_byvolume.unregister()
     Addon_decimate_mesh.unregister()
 
 # 実行時の処理
