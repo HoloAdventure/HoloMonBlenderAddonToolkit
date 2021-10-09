@@ -301,6 +301,7 @@ def apply_decimate_mesh(arg_targetobject:bpy.types.Object, arg_decimateratio:flo
     decimate_modifier.ratio = arg_decimateratio
     # 「ポリゴン数削減」モディファイアを適用する
     bpy.ops.object.modifier_apply(modifier=decimate_modifier.name)
+    
     return True
 
 # 指定メッシュの三角面数を取得する
@@ -319,6 +320,7 @@ def count_alltriangles_mesh() -> int:
     for obj in bpy.data.objects:
         # 三角面数を加算する
         triangles_count += count_triangles_mesh(obj)
+
     return triangles_count
 
 # 指定メッシュの三角面数を取得する
@@ -344,6 +346,7 @@ def count_triangles_mesh(arg_object:bpy.types.Object) -> int:
     msh.calc_loop_triangles()
     # 三角面数を取得する
     triangles_count = len(msh.loop_triangles)
+
     return triangles_count
 
 
