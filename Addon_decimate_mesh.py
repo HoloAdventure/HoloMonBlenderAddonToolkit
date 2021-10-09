@@ -4,6 +4,7 @@ ADDON_OPERATOR_IDNAME = "holomon.decimate_mesh"
 
 # 利用するタイプやメソッドのインポート
 import bpy
+import math
 from bpy.types import Operator, Panel, PropertyGroup
 from bpy.props import PointerProperty, IntProperty
 
@@ -125,7 +126,7 @@ class HOLOMON_OT_holomon_decimate_mesh(Operator):
         mintrianglecount = context.scene.holomon_decimate_mesh.prop_mintrianglecount
         
         # 全メッシュを対象に指定のポリゴン数まで削減する
-        operator_result = apply_decimate_allmeshcount(
+        operator_result = apply_decimate_calculate(
             arg_targettrianglecount=targettrianglecount,
             arg_mintrianglecount=mintrianglecount
         )
@@ -182,9 +183,9 @@ def unregister():
         bpy.utils.unregister_class(regist_cls)
 
 
-
 # 全メッシュを対象に指定のポリゴン数まで削減する
-def apply_decimate_allmeshcount(arg_targettrianglecount:int=10000, arg_mintrianglecount:int=0) -> bool:
+# 最低ポリゴン数の指定を考慮して計算を行う
+def apply_decimate_calculate(arg_targettrianglecount:int=10000, arg_mintrianglecount:int=0) -> float:
     """全メッシュを対象に指定のポリゴン数まで削減する
 
     Keyword Arguments:
@@ -192,7 +193,7 @@ def apply_decimate_allmeshcount(arg_targettrianglecount:int=10000, arg_mintriang
         arg_mintrianglecount {int} -- オブジェクトの最低ポリゴン数 (default: {0})
 
     Returns:
-        Bool -- 実行正否
+        float -- 削減比率
     """
 
     # 全メッシュの総ポリゴン(三角面)数を取得する
@@ -203,6 +204,54 @@ def apply_decimate_allmeshcount(arg_targettrianglecount:int=10000, arg_mintriang
     if current_trianglecount > arg_targettrianglecount:
         # 指定のポリゴン数まで削減するための比率を計算する
         target_ratio = arg_targettrianglecount / current_trianglecount
+    
+    # 最低ポリゴン数を考慮して削減を実行した後のポリゴン数を計算する
+    forecast_trianglecount = current_trianglecount
+
+    # 予想ポリゴン数が指定のポリゴン数を下回るまで計算を繰り返す
+    while forecast_trianglecount > arg_targettrianglecount:
+        # ループの継続フラグ
+        continue_flg = False
+
+        # 予想ポリゴン数を 0 にリセット
+        forecast_trianglecount = 0
+        # シーン内の全オブジェクトデータを取得する
+        for obj in bpy.context.scene.objects:
+            # オブジェクトに反映する削減比率
+            obj_ratio = target_ratio
+            # オブジェクトのポリゴン数を取得する
+            obj_trianglecount = count_triangles_mesh(obj)
+
+            # 対象のオブジェクトが既に最低ポリゴン数を下回っていないかチェックする
+            if obj_trianglecount < arg_mintrianglecount:
+                # 下回っていれば対象のオブジェクトに設定する削減比率は 1 になる
+                obj_ratio = 1.0
+            # 削減後に指定の最低ポリゴン数を下回らないかチェックする
+            elif (obj_trianglecount * target_ratio) < arg_mintrianglecount:
+                # 下回るようであれば最低ポリゴン数までの削減比率を再計算する
+                obj_ratio = arg_mintrianglecount / obj_trianglecount
+            # 削減後にも最低ポリゴン数を下回らないオブジェクトの場合
+            else:
+                # 削減の余地があることをチェックする
+                continue_flg = True
+            
+            # 削減後のポリゴン数を計算する
+            after_trianglecount = obj_trianglecount * obj_ratio
+            # 予想ポリゴン数に加算する（切り捨てで計算）
+            forecast_trianglecount += math.floor(after_trianglecount)
+
+        # ループの継続フラグをチェックする
+        if continue_flg == False:
+            # 継続しても改善が見込めない場合はループを終了する
+            break
+
+        # 予想ポリゴン数が指定のポリゴン数を上回っているなら削減比率を再調整する
+        if forecast_trianglecount > arg_targettrianglecount:
+            # 超過分の削減比率を計算する
+            over_ratio = arg_targettrianglecount / forecast_trianglecount
+            # 削減比率に乗算する
+            target_ratio *= over_ratio
+
     # シーン内の全オブジェクトデータを取得する
     for obj in bpy.context.scene.objects:
         # オブジェクトに反映する削減比率
@@ -219,6 +268,7 @@ def apply_decimate_allmeshcount(arg_targettrianglecount:int=10000, arg_mintriang
             obj_ratio = arg_mintrianglecount / obj_trianglecount
         # オブジェクトを指定の比率でポリゴン削減する
         apply_decimate_mesh(arg_targetobject=obj, arg_decimateratio=obj_ratio)
+
     return True
 
 # 対象オブジェクトを指定の比率でポリゴン削減する
