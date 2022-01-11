@@ -169,7 +169,7 @@ class HOLOMON_PROP_holomon_decimate_vertexselect(PropertyGroup):
     
     # 削減比率指定用のカスタムプロパティを定義する
     prop_decimateratio: FloatProperty(
-        name = "削減する参画面の割合",                 # プロパティ名
+        name = "削減する三角面の割合",                 # プロパティ名
         default=1.0,                                  # デフォルト値
         description = "ポリゴンの削減比率を設定する",  # 説明文
     )
