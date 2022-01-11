@@ -121,7 +121,7 @@ class HOLOMON_OT_holomon_decimate_vertexselect(Operator):
     bl_idname = ADDON_OPERATOR_IDNAME
     # クラスのラベルを定義する
     # (デフォルトのテキスト表示などに利用)
-    bl_label = "選択範囲のポリゴン削減"
+    bl_label = "選択範囲の削減を実行"
     # クラスの説明文
     # (マウスオーバー時に表示)
     bl_description = "現在の選択範囲に対してポリゴン数削減を行います"
@@ -169,7 +169,7 @@ class HOLOMON_PROP_holomon_decimate_vertexselect(PropertyGroup):
     
     # 削減比率指定用のカスタムプロパティを定義する
     prop_decimateratio: FloatProperty(
-        name = "Decimate Ratio",                      # プロパティ名
+        name = "削減する参画面の割合",                 # プロパティ名
         default=1.0,                                  # デフォルト値
         description = "ポリゴンの削減比率を設定する",  # 説明文
     )
