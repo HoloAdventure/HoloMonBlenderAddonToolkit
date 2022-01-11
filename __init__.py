@@ -20,7 +20,7 @@ bl_info = {
     "name": "HoloMon Blender Addon Toolkit",         # プラグイン名
     "author": "HoloMon",                             # 制作者名
     "version": (1, 3),                               # バージョン
-    "blender": (3, 00, 0),                           # 動作可能なBlenderバージョン
+    "blender": (2, 90, 0),                           # 動作可能なBlenderバージョン
     "support": "COMMUNITY",                          # サポートレベル(OFFICIAL,COMMUNITY,TESTING)
     "category": "3D View",                           # カテゴリ名
     "location": "View3D > Sidebar > HMToolkit",      # ロケーション
