@@ -7,17 +7,20 @@ if "bpy" in locals():
         importlib.reload(Addon_delete_object_byvolume)
     if "Addon_decimate_mesh" in locals():
         importlib.reload(Addon_decimate_mesh)
+    if "Addon_decimate_vertexselect" in locals():
+        importlib.reload(Addon_decimate_vertexselect)
 import bpy
 from . import Addon_control_view
 from . import Addon_delete_object_byvolume
 from . import Addon_decimate_mesh
+from . import Addon_decimate_vertexselect
 
 # bl_infoでプラグインに関する情報の定義を行う
 bl_info = {
     "name": "HoloMon Blender Addon Toolkit",         # プラグイン名
     "author": "HoloMon",                             # 制作者名
-    "version": (1, 2),                               # バージョン
-    "blender": (2, 90, 0),                           # 動作可能なBlenderバージョン
+    "version": (1, 3),                               # バージョン
+    "blender": (3, 00, 0),                           # 動作可能なBlenderバージョン
     "support": "COMMUNITY",                          # サポートレベル(OFFICIAL,COMMUNITY,TESTING)
     "category": "3D View",                           # カテゴリ名
     "location": "View3D > Sidebar > HMToolkit",      # ロケーション
@@ -33,12 +36,15 @@ def register():
     Addon_control_view.register()
     Addon_delete_object_byvolume.register()
     Addon_decimate_mesh.register()
+    Addon_decimate_vertexselect.register()
+
 # 作成クラスと定義の登録解除メソッド
 def unregister():
     # 各アドオンの登録解除メソッドを呼び出す
     Addon_control_view.unregister()
     Addon_delete_object_byvolume.unregister()
     Addon_decimate_mesh.unregister()
+    Addon_decimate_vertexselect.unregister()
 
 # 実行時の処理
 if __name__ == "__main__":
