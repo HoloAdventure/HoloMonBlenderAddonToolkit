@@ -72,25 +72,56 @@ class HOLOMON_PT_holomon_decimate_vertexselect(Panel):
         draw_layout = self.layout
         # ボックス要素を作成する
         draw_box = draw_layout.box()
+
+        # ボックス内に要素行を作成する
+        selecttool_row = draw_box.row()
+        # 行内に要素列を作成する
+        selecttooltext_column = selecttool_row.column(align=True)
+        # 行内にテキストを作成する
+        selecttooltext_column.label(text="選択方式")
+        # 行内に要素列を作成する
+        selecttoolbutton_column = selecttool_row.column(align=True)
+        # 行内に要素列を作成する
+        selectbox_row = selecttoolbutton_column.column(align=False)
+        # 選択方式を切り替えるボタンを配置する
+        selectbox_prop = selectbox_row.operator("wm.tool_set_by_id", text="ボックス")
+        # 引数を指定する
+        selectbox_prop.name = 'builtin.select_box'
+        # 行内に要素列を作成する
+        selectcircle_row = selecttoolbutton_column.column(align=False)
+        # 選択方式を切り替えるボタンを配置する
+        selectcircle_prop = selectcircle_row.operator("wm.tool_set_by_id", text="サークル")
+        # 引数を指定する
+        selectcircle_prop.name = 'builtin.select_circle'
+        # 行内に要素列を作成する
+        selectlasso_row = selecttoolbutton_column.column(align=False)
+        # 選択方式を切り替えるボタンを配置する
+        selectlasso_prop = selectlasso_row.operator("wm.tool_set_by_id", text="投げ縄")
+        # 引数を指定する
+        selectlasso_prop.name = 'builtin.select_lasso'
+
         # ボックス内に要素行を作成する
         invert_row = draw_box.row()
-        # 選択範囲の反転を実行するボタンを配置する
-        select_all_prop = invert_row.operator("mesh.select_all", text="選択範囲の反転")
-        select_all_prop.action = 'INVERT'
-        # ボックス内に要素行を作成する
-        link_row = draw_box.row()
-        # 接続部分の選択を実行するボタンを配置する
-        link_row.operator("mesh.select_linked", text="接続部分の選択")
-        # ボックス内に要素行を作成する
-        moreless_column = draw_box.row()
         # 行内に要素列を作成する
-        text_row = moreless_column.column(align=True)
+        inverttext_column = invert_row.column(align=True)
         # 行内にテキストを作成する
-        text_row.label(text="範囲拡縮")
+        inverttext_column.label(text="選択範囲の操作")
         # 行内に要素列を作成する
-        switchbutton_column = moreless_column.column(align=True)
-        # 更に分割する
-        switchbutton_row = switchbutton_column.row()
+        invertbutton_column = invert_row.column(align=True)
+        # 選択範囲の反転を実行するボタンを配置する
+        select_all_prop = invertbutton_column.operator("mesh.select_all", text="反転")
+        select_all_prop.action = 'INVERT'
+        # 接続部分の選択を実行するボタンを配置する
+        select_link_prop = invertbutton_column.operator("mesh.select_linked", text="連続部分")
+
+        # ボックス内に要素行を作成する
+        moreless_row = draw_box.row()
+        # 行内に要素列を作成する
+        text_column = moreless_row.column(align=True)
+        # 行内にテキストを作成する
+        text_column.label(text="範囲拡縮")
+        # 行内に要素列を作成する
+        switchbutton_row = moreless_row.row(align=True)
         # 行内に要素列を作成する
         more_row = switchbutton_row.column(align=False)
         # 範囲拡大を実行するボタンを配置する
@@ -99,16 +130,21 @@ class HOLOMON_PT_holomon_decimate_vertexselect(Panel):
         less_row = switchbutton_row.column(align=False)
         # 範囲拡大を実行するボタンを配置する
         less_row.operator("mesh.select_less", text="－")
+
         # ボックス内に要素行を作成する
         ratio_row = draw_box.row()
+        # 行内にテキストを作成する
+        ratio_row.label(text="削減比率")
         # 削減比率指定用のカスタムプロパティを配置する
         ratio_row.prop(context.scene.holomon_decimate_vertexselect, "prop_decimateratio")
+
         # ボックス内に要素行を作成する
         execute_row = draw_box.row()
         # 接続部分の選択を実行するボタンを配置する
         execute_row.operator(ADDON_OPERATOR_IDNAME)
+
         # 現在のモードが「編集モード(EDIT_MESH)」かチェックする
-        if check_viewmode('EDIT_MESH') == False:
+        if is_editmode() == False:
             # 「編集モード(EDIT_MESH)」でない場合
             # ボックス要素を無効化する
             draw_box.enabled = False
@@ -121,7 +157,7 @@ class HOLOMON_OT_holomon_decimate_vertexselect(Operator):
     bl_idname = ADDON_OPERATOR_IDNAME
     # クラスのラベルを定義する
     # (デフォルトのテキスト表示などに利用)
-    bl_label = "選択範囲の削減を実行"
+    bl_label = "選択範囲の削減を実行する"
     # クラスの説明文
     # (マウスオーバー時に表示)
     bl_description = "現在の選択範囲に対してポリゴン数削減を行います"
@@ -143,7 +179,7 @@ class HOLOMON_OT_holomon_decimate_vertexselect(Operator):
     # Operator実行時の処理
     def execute(self, context):
         # 現在のモードが「編集モード(EDIT_MESH)」かチェックする
-        if check_viewmode('EDIT_MESH') == False:
+        if is_editmode() == False:
             # 「編集モード(EDIT_MESH)」でない場合処理しない
             return {'CANCELLED'}
 
@@ -169,9 +205,9 @@ class HOLOMON_PROP_holomon_decimate_vertexselect(PropertyGroup):
     
     # 削減比率指定用のカスタムプロパティを定義する
     prop_decimateratio: FloatProperty(
-        name = "削減する三角面の割合",                 # プロパティ名
-        default=1.0,                                  # デフォルト値
-        description = "ポリゴンの削減比率を設定する",  # 説明文
+        name = "",                                   # プロパティ名
+        default=1.0,                                 # デフォルト値
+        description = "三角面の削減比率を設定する",    # 説明文
     )
 
 # 登録に関する処理
@@ -200,53 +236,153 @@ def unregister():
         bpy.utils.unregister_class(regist_cls)
 
 
+# 編集モード中の全オブジェクトで選択中の頂点に対して割合を考慮してオブジェクトをリダクションする
 def execute_decimate_vertexselect(arg_decimateratio:float) -> bool:
-    """選択頂点に対するポリゴン数削減を実行する
+    """編集モード中の全オブジェクトで選択中の頂点に対して割合を考慮してオブジェクトをリダクションする
+    頂点を選択していないオブジェクトまたは編集モードでないオブジェクトに対して処理は行わない
 
     Keyword Arguments:
-        arg_decimateratio {float} -- 指定の削減比率
+        arg_decimateratio {float} -- 削減比率
 
     Returns:
         bool -- 実行成否
     """
 
-    # 現在のモードが「編集モード(EDIT_MESH)」かチェックする
-    if check_viewmode('EDIT_MESH') == False :
+    # 現在のモードが編集モードかチェックする
+    # （誤操作を防ぐため）
+    if is_editmode() == False:
         return False
-    # 対象となる現在編集中のアクティブオブジェクトの参照を取得する
-    target_object = bpy.context.view_layer.objects.active
-    # 頂点の削減比率を指定する
-    decimate_ratio = arg_decimateratio
-    # 選択中の頂点から新規頂点グループを作成して頂点グループを取得する
-    made_vertexgroup = make_vertexgroup()
-    # 頂点グループの頂点数を考慮した削減比率を再計算する
-    vertexgroup_decimeate_ratio = calculate_decimatefactor_onvertexgourp(
-        target_object, made_vertexgroup.name, decimate_ratio
-    )
-    # モディファイアを設定するためオブジェクトモードに切り替える
-    set_mode_object()
-    # リダクションを行う
-    decimate_result = apply_decimate_vertexgroup(
-        target_object, made_vertexgroup.name, vertexgroup_decimeate_ratio
-    )
-    if decimate_result == False :
-        return False
-    # 使用した頂点グループを削除する
-    delete_vertexgroup(target_object, made_vertexgroup.name)
-    # モードを編集モードに戻す
-    set_mode_edit()
-    
+    # 編集対象のオブジェクトリストを作成する
+    targetobject_list = []
+    # シーン内の全オブジェクトを走査する
+    for check_obj in bpy.context.scene.objects:
+        # 編集モード中のオブジェクトを対象とする
+        if is_editmode_object(check_obj) == True:
+            # 編集モード中であれば頂点グループ作成の対象とする
+            targetobject_list.append(check_obj)
+    # 対象のオブジェクトがあったか
+    if len(targetobject_list) <= 0:
+        # 対象のオブジェクトが無かった場合、頂点グループは作成しない
+        return True
+    # アクティブオブジェクトの参照を退避する
+    active_object = bpy.context.view_layer.objects.active
+    # オブジェクトモードに移行する
+    set_objectmode()
+    # 対象のオブジェクトを全て処理する
+    for target_obj in targetobject_list:
+        # 選択中の頂点があれば頂点グループを作成する
+        made_vertexgroup = make_vertexgroup_byselectvert(target_obj)
+        # 頂点グループが作成されていれば処理を行う
+        if made_vertexgroup != None:
+            # 頂点グループの頂点数を考慮した削減比率を再計算する
+            vertexgroup_decimeate_ratio = calculate_decimatefactor_onvertexgourp(
+                target_obj, made_vertexgroup, arg_decimateratio
+            )
+            # リダクションを行う
+            apply_decimate_vertexgroup(target_obj, made_vertexgroup, vertexgroup_decimeate_ratio)
+            # 頂点グループを削除する
+            remove_vertexgroup(target_obj, made_vertexgroup)
+    # 対象のオブジェクトを全て処理する
+    for target_obj in targetobject_list:
+        # 処理対象のオブジェクトが編集モードになるよう選択状態とする
+        select_object(target_obj)
+    # 編集モードに戻す
+    set_editmode()
+    # アクティブオブジェクトを戻す
+    bpy.context.view_layer.objects.active = active_object
     return True
 
+# 選択中の頂点から新規頂点グループを作成して頂点グループを取得する
+def make_vertexgroup_byselectvert(arg_object:bpy.types.Object) -> bpy.types.VertexGroup:
+    """選択中の頂点から新規頂点グループを作成して頂点グループを取得する
+
+    Keyword Arguments:
+        arg_object {bpy.types.Object} -- 対象オブジェクト
+
+    Returns:
+        bpy.types.VertexGroup -- 新規頂点グループ
+    """
+
+    # 現在のモードがオブジェクトモードかチェックする
+    # （VertexGroupのAddは編集モードで実行不可のため）
+    if is_objectmode() == False :
+        return None
+    # 指定オブジェクトがメッシュか確認する
+    if arg_object.type != 'MESH':
+        # メッシュでない場合は処理しない
+        return None
+    # インデックスリストを作成する
+    index_list = []
+    # 全ての頂点を走査する
+    # 頂点操作のマニュアル
+    # (https://docs.blender.org/api/current/bpy.types.MeshVertex.html)
+    for vert in arg_object.data.vertices:
+        # 選択状態か否か
+        if vert.select:
+            # 選択中の頂点のインデックスをリストに追加する
+            index_list.append(vert.index)
+    # 選択中の頂点があったか
+    if len(index_list) <= 0:
+        # 選択中の頂点が無かった場合、頂点グループは作成しない
+        return None
+    # オブジェクトに新規頂点グループを追加する
+    # VertexGroupsアクセスのマニュアル
+    # (https://docs.blender.org/api/current/bpy.types.VertexGroups.html)
+    vertexgroup = arg_object.vertex_groups.new()
+    # 選択中の頂点のインデックスを頂点グループに設定する
+    # VertexGroupアクセスのマニュアル
+    # (https://docs.blender.org/api/current/bpy.types.VertexGroup.html#bpy.types.VertexGroup)
+    vertexgroup.add(index_list, 1.0, 'REPLACE')
+    # 作成した頂点グループを返却する
+    return vertexgroup
+
+# オブジェクトから指定の頂点グループを削除する
+def remove_vertexgroup(arg_object:bpy.types.Object, arg_vertexgroup:bpy.types.VertexGroup) -> bool:
+    """オブジェクトから指定の頂点グループを削除する
+
+    Keyword Arguments:
+        arg_object {bpy.types.Object} -- 対象オブジェクト
+        arg_vertexgroup {bpy.types.VertexGroup} -- 指定の頂点グループ
+
+    Returns:
+        bool -- 実行成否
+    """
+    
+    # 指定オブジェクトに指定の頂点グループが含まれるかチェックする
+    check_vertexgroup = arg_object.vertex_groups.get(arg_vertexgroup.name)
+    if check_vertexgroup == None:
+        return False
+    # 頂点グループを削除する
+    arg_object.vertex_groups.remove(check_vertexgroup)
+    # 実行成否を返却する
+    return True
+
+# 指定のオブジェクトを選択状態にする
+def select_object(arg_object:bpy.types.Object) -> bool:
+    """指定のオブジェクトを選択状態にする
+
+    Keyword Arguments:
+        arg_object {bpy.types.Object} -- 対象オブジェクト
+
+    Returns:
+        bool -- 実行成否
+    """
+    
+    # 指定のオブジェクトを選択状態にする
+    arg_object.select_set(True)
+    # 実行成否を返却する
+    return True
+
+# 頂点グループを指定してポリゴン数削減モディファイアを適用する
 def apply_decimate_vertexgroup(
     arg_object:bpy.types.Object,
-    arg_vertexgroup_name:str,
+    arg_vertexgroup:bpy.types.VertexGroup,
     arg_decimateratio:float) -> bool:
     """頂点グループを指定してポリゴン数削減モディファイアを適用する
 
     Keyword Arguments:
-        arg_object (bpy.types.Object): 指定オブジェクト
-        arg_vertexgroup_name {str} -- 指定の頂点グループ名
+        arg_object (bpy.types.Object) -- 指定オブジェクト
+        arg_vertexgroup {bpy.types.VertexGroup} -- 指定の頂点グループ
         arg_decimateratio {float} -- 削減比率
 
     Returns:
@@ -254,7 +390,7 @@ def apply_decimate_vertexgroup(
     """
 
     # 指定オブジェクトに指定の頂点グループが含まれるかチェックする
-    check_vertexgroup = arg_object.vertex_groups.get(arg_vertexgroup_name)
+    check_vertexgroup = arg_object.vertex_groups.get(arg_vertexgroup.name)
     if check_vertexgroup == None:
         return False
     # 指定オブジェクトがメッシュか確認する
@@ -276,22 +412,22 @@ def apply_decimate_vertexgroup(
     # 削減の比率を設定する
     decimate_modifier.ratio = arg_decimateratio
     # 頂点グループを指定する
-    decimate_modifier.vertex_group = arg_vertexgroup_name
+    decimate_modifier.vertex_group = check_vertexgroup.name
     # 「ポリゴン数削減」モディファイアを適用する
     bpy.ops.object.modifier_apply(modifier=decimate_modifier.name)
-    
     # 実行成否を返却する
     return True
 
+# 頂点グループの頂点数に対応する削減比率を再計算する
 def calculate_decimatefactor_onvertexgourp(
     arg_object:bpy.types.Object,
-    arg_vertexgroup_name:str,
+    arg_vertexgroup:bpy.types.VertexGroup,
     arg_decimateratio:float) -> float:
     """頂点グループの頂点数に対応する削減比率を再計算する
 
     Keyword Arguments:
         arg_object {bpy.types.Object} -- 指定オブジェクト
-        arg_vertexgroup_name {str} -- 指定の頂点グループ名
+        arg_vertexgroup {bpy.types.VertexGroup} -- 指定の頂点グループ
         arg_decimateratio {float} -- 削減比率
 
     Returns:
@@ -299,46 +435,25 @@ def calculate_decimatefactor_onvertexgourp(
     """
 
     # 指定オブジェクトに指定の頂点グループが含まれるかチェックする
-    check_vertexgroup = arg_object.vertex_groups.get(arg_vertexgroup_name)
+    check_vertexgroup = arg_object.vertex_groups.get(arg_vertexgroup.name)
     if check_vertexgroup == None:
-        return arg_decimateratio
+        return 1.0
     # 指定オブジェクトがメッシュか確認する
     if arg_object.type != 'MESH':
         # メッシュが存在しない場合は処理しない
         return arg_decimateratio
     # 頂点グループの参照から頂点グループに所属している頂点数を算出つする
-    vertexgroup_count = count_weight_vertexgroup(arg_object, arg_vertexgroup_name)
+    vertexgroup_count = count_weight_vertexgroup(arg_object, check_vertexgroup)
     # 全体の頂点数を確認する
     vertex_count = count_data_vertex(arg_object)
     # 頂点グループの割合を算出する
     vertexgroup_ratio = vertexgroup_count / vertex_count
     # 頂点グループの割合を考慮して削減比率を再計算する
     vertexgroup_decimateratio = 1.0 - ((1.0 - arg_decimateratio) * vertexgroup_ratio)
-
+    # 再計算後の削減比率を返す
     return vertexgroup_decimateratio
 
-def delete_vertexgroup(arg_object:bpy.types.Object, arg_vertexgroup_name:str) -> bool:
-    """指定の頂点グループを削除する
-
-    Keyword Arguments:
-        arg_object (bpy.types.Object): 指定オブジェクト
-        arg_vertexgroup_name {str} -- 指定の頂点グループ名
-
-    Returns:
-        bool -- 実行成否
-    """
-
-    # 指定オブジェクトに指定の頂点グループが含まれるかチェックする
-    check_vertexgroup = arg_object.vertex_groups.get(arg_vertexgroup_name)
-    if check_vertexgroup == None:
-        return False
-    # 指定頂点グループをアクティブにする
-    arg_object.vertex_groups.active_index = check_vertexgroup.index
-    # 指定頂点グループを削除する
-    bpy.ops.object.vertex_group_remove(all=False)
-
-    return True
-
+# 指定のオブジェクトの頂点の数を取得する
 def count_data_vertex(arg_object:bpy.types.Object) -> int:
     """指定のオブジェクトの頂点の数を取得する
 
@@ -352,26 +467,26 @@ def count_data_vertex(arg_object:bpy.types.Object) -> int:
     # データに保持されている頂点の数を返却する
     return len(arg_object.data.vertices)
 
+# 指定の頂点グループに所属している頂点の数を取得する(頂点グループの参照から算出)
 def count_weight_vertexgroup(
-    arg_object:bpy.types.Object, arg_vertexgroup_name:str) -> int:
+    arg_object:bpy.types.Object,
+     arg_vertexgroup:bpy.types.VertexGroup) -> int:
     """指定の頂点グループに所属している頂点の数を取得する(頂点グループの参照から算出)
 
     Keyword Arguments:
         arg_object {bpy.types.Object} -- 指定オブジェクト
-        arg_vertexgroup_name {str} -- 指定の頂点グループ名
+        arg_vertexgroup {bpy.types.VertexGroup} -- 指定の頂点グループ
 
     Returns:
         int -- 頂点グループに含まれる頂点数
     """
 
     # 指定オブジェクトに指定の頂点グループが含まれるかチェックする
-    check_vertexgroup = arg_object.vertex_groups.get(arg_vertexgroup_name)
+    check_vertexgroup = arg_object.vertex_groups.get(arg_vertexgroup.name)
     if check_vertexgroup == None:
         return 0
     # カウント用変数
     result_count = 0
-    # 指定の頂点グループについて頂点グループリストでのインデックス番号を取得する
-    check_vertexgroup_index = check_vertexgroup.index
     # 指定オブジェクトの全頂点を走査する
     for vert in arg_object.data.vertices:
         try:
@@ -384,78 +499,77 @@ def count_weight_vertexgroup(
     # カウント結果を返却する
     return result_count
 
-# オブジェクトモードへの移行
-# モード切替のマニュアル
-# (https://docs.blender.org/api/current/bpy.ops.object.html#bpy.ops.object.mode_set)
-def set_mode_object() -> bool:
-    """オブジェクトモードへの移行
+# 指定のオブジェクトが編集モードかチェックする
+def is_editmode_object(arg_object:bpy.types.Object) -> bool:
+    """指定のオブジェクトが編集モードかチェックする
+    
+    Keyword Arguments:
+        arg_object {bpy.types.Object} -- 対象オブジェクト
 
     Returns:
-        bool -- 実行の正否
+        bool -- 編集モードか否か
+    """
+
+    # オブジェクト毎のモードをチェックする
+    # (https://docs.blender.org/api/current/bpy.types.Object.html#bpy.types.Object.mode)
+    return ('EDIT' == arg_object.mode)
+
+# オブジェクトモードに移行する
+def set_objectmode():
+    """オブジェクトモードに移行する
+
+    Keyword Arguments:
+
+    Returns:
     """
 
     # オブジェクトモードに移行する
     # モード切替のマニュアル
     # (https://docs.blender.org/api/current/bpy.ops.object.html#bpy.ops.object.mode_set)
-    # mode:OBJECT オブジェクトモードに切り替え
-    # toggle:True の場合、既に編集モードの時、オブジェクトモードに戻る
     bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-    return True
+    return
 
-# 編集モードへの移行
-# モード切替のマニュアル
-# (https://docs.blender.org/api/current/bpy.ops.object.html#bpy.ops.object.mode_set)
-def set_mode_edit() -> bool:
-    """編集モードへの移行
+# 現在のモードがオブジェクトモードかチェックする
+def is_objectmode() -> bool:
+    """現在のモードがオブジェクトモードかチェックする
+
+    Keyword Arguments:
 
     Returns:
-        bool -- 実行の正否
+        bool -- オブジェクトモードか否か
+    """
+
+    # 現在のモードをチェックする
+    # (https://docs.blender.org/api/current/bpy.context.html#bpy.context.mode)
+    return ('OBJECT' == bpy.context.mode)
+
+# 編集モードに移行する
+def set_editmode():
+    """編集モードに移行する
+
+    Keyword Arguments:
+
+    Returns:
     """
 
     # 編集モードに移行する
     # モード切替のマニュアル
     # (https://docs.blender.org/api/current/bpy.ops.object.html#bpy.ops.object.mode_set)
-    # mode:EDIT 編集モードに切り替え
-    # toggle:True の場合、既に編集モードの時、オブジェクトモードに戻る
     bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-    return True
+    return
 
-# 選択中の頂点から新規頂点グループを作成して頂点グループを取得する
-def make_vertexgroup() -> bpy.types.VertexGroup:
-    """選択中の頂点から新規頂点グループを作成して頂点グループを取得する
+# 現在のモードが編集モードかチェックする
+def is_editmode() -> bool:
+    """現在のモードが編集モードかチェックする
 
     Keyword Arguments:
 
     Returns:
-        bpy.types.VertexGroup -- 新規頂点グループ
-    """
-
-    # 現在のモードが「編集モード(EDIT_MESH)」かチェックする
-    if check_viewmode('EDIT_MESH') == False :
-        return ""
-    # 編集中のアクティブオブジェクトを取得する
-    active_object = bpy.context.view_layer.objects.active
-    # 選択中の頂点に新規頂点グループを割り当てる
-    bpy.ops.object.vertex_group_assign_new()
-    # 作成した頂点グループのインデックス番号を取得する
-    make_index = active_object.vertex_groups.active_index
-    # 作成した頂点グループの頂点グループを返却する
-    return active_object.vertex_groups[make_index]
-
-# 現在のモードが指定のモードかチェックする
-def check_viewmode(arg_checktype:str) -> bool:
-    """現在のモードが指定のモードかチェックする
-
-    Keyword Arguments:
-        arg_checktype {str} -- 比較するモード名
-
-    Returns:
-        str -- 現在のモード
+        bool -- 編集モードか否か
     """
 
     # 現在のモードをチェックする
     # (https://docs.blender.org/api/current/bpy.context.html#bpy.context.mode)
-    modetype = bpy.context.mode
-    return (arg_checktype == modetype)
+    return ('EDIT_MESH' == bpy.context.mode)
 
 

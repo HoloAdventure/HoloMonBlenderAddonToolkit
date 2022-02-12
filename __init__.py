@@ -19,7 +19,7 @@ from . import Addon_decimate_vertexselect
 bl_info = {
     "name": "HoloMon Blender Addon Toolkit",         # プラグイン名
     "author": "HoloMon",                             # 制作者名
-    "version": (1, 3),                               # バージョン
+    "version": (1, 4),                               # バージョン
     "blender": (2, 90, 0),                           # 動作可能なBlenderバージョン
     "support": "COMMUNITY",                          # サポートレベル(OFFICIAL,COMMUNITY,TESTING)
     "category": "3D View",                           # カテゴリ名
