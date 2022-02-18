@@ -76,7 +76,7 @@ class HOLOMON_PT_holomon_delete_object_byvolume(Panel):
         # 要素列を作成する
         volume_column = volume_box.column()
         # テキストを作成する
-        volume_column.label(text="体積での選択(Enterで実行)")
+        volume_column.label(text="体積での選択(Enterで選択)")
         # 最大体積指定用のカスタムプロパティを配置する
         volume_column.prop(context.scene.holomon_delete_object_byvolume, "prop_targetmaxvolume", text="")
         # ボックス要素を作成する
@@ -84,7 +84,7 @@ class HOLOMON_PT_holomon_delete_object_byvolume(Panel):
         # 要素列を作成する
         patternline_column = pattern_box.column()
         # テキストを作成する
-        patternline_column.label(text="正規表現での選択(Enterで実行)")
+        patternline_column.label(text="正規表現での選択(Enterで選択)")
         # 正規表現指定用のカスタムプロパティを配置する
         patternline_column.prop(context.scene.holomon_delete_object_byvolume, "prop_checkpattern", text="")
         # 要素行を作成する
@@ -153,8 +153,6 @@ class HOLOMON_PROP_holomon_delete_object_byvolume(PropertyGroup):
         # 処理対象のオブジェクトリストを作成する
         target_objectlist = list()
         for obj in bpy.context.scene.objects:
-            if obj.type != 'MESH':
-                continue
             # オブジェクト名が指定の正規表現と一致するか
             if re.fullmatch(check_pattern, obj.name):
                 target_objectlist.append(obj)
