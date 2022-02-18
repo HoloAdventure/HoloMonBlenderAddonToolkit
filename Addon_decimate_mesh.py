@@ -71,18 +71,18 @@ class HOLOMON_PT_holomon_decimate_mesh(Panel):
     def draw(self, context):
         # Operatorをボタンとして配置する
         draw_layout = self.layout
-        # 要素行を作成する
-        line_row = draw_layout.row()
+        # ボックス要素を作成する
+        setting_box = draw_layout.box()
+        # 要素列を作成する
+        setting_column = setting_box.column()
         # 削減後の総ポリゴン数指定用のカスタムプロパティを配置する
-        line_row.prop(context.scene.holomon_decimate_mesh, "prop_targettrianglecount")
-        # 要素行を作成する
-        line_row = draw_layout.row()
+        setting_column.prop(context.scene.holomon_decimate_mesh, "prop_targettrianglecount")
         # １メッシュ辺りの最低ポリゴン数指定用のカスタムプロパティを配置する
-        line_row.prop(context.scene.holomon_decimate_mesh, "prop_mintrianglecount")
+        setting_column.prop(context.scene.holomon_decimate_mesh, "prop_mintrianglecount")
         # 要素行を作成する
-        line_row = draw_layout.row()
+        bottun_row = draw_layout.row()
         # ポリゴン数削減を実行するボタンを配置する
-        line_row.operator(ADDON_OPERATOR_IDNAME)
+        bottun_row.operator(ADDON_OPERATOR_IDNAME)
 
 # Operatorクラスの作成
 # 参考URL:https://docs.blender.org/api/current/bpy.types.Operator.html

@@ -4,8 +4,9 @@ ADDON_OPERATOR_IDNAME = "holomon.decimate_object"
 
 # 利用するタイプやメソッドのインポート
 import bpy
+import re
 from bpy.types import Operator, Panel, PropertyGroup
-from bpy.props import PointerProperty, FloatProperty
+from bpy.props import PointerProperty, FloatProperty, StringProperty
 
 # 継承するクラスの命名規則は以下の通り
 # [A-Z][A-Z0-9_]*_(継承クラスごとの識別子)_[A-Za-z0-9_]+
@@ -21,7 +22,7 @@ from bpy.props import PointerProperty, FloatProperty
 class HOLOMON_PT_holomon_delete_object_byvolume(Panel):
     # パネルのラベル名を定義する
     # パネルを折りたたむパネルヘッダーに表示される
-    bl_label = "サイズ指定のオブジェクト削除"
+    bl_label = "オブジェクトの選択と削除"
     # クラスのIDを定義する
     # 命名規則は CATEGORY_PT_name
     bl_idname = "HOLOMON_PT_" + ADDON_COMMONNAME
@@ -70,14 +71,26 @@ class HOLOMON_PT_holomon_delete_object_byvolume(Panel):
     def draw(self, context):
         # Operatorをボタンとして配置する
         draw_layout = self.layout
-        # 要素行を作成する
-        line_row = draw_layout.row()
+        # ボックス要素を作成する
+        volume_box = draw_layout.box()
+        # 要素列を作成する
+        volume_column = volume_box.column()
+        # テキストを作成する
+        volume_column.label(text="体積での選択(Enterで実行)")
         # 最大体積指定用のカスタムプロパティを配置する
-        line_row.prop(context.scene.holomon_delete_object_byvolume, "prop_targetmaxvolume")
+        volume_column.prop(context.scene.holomon_delete_object_byvolume, "prop_targetmaxvolume", text="")
+        # ボックス要素を作成する
+        pattern_box = draw_layout.box()
+        # 要素列を作成する
+        patternline_column = pattern_box.column()
+        # テキストを作成する
+        patternline_column.label(text="正規表現での選択(Enterで実行)")
+        # 正規表現指定用のカスタムプロパティを配置する
+        patternline_column.prop(context.scene.holomon_delete_object_byvolume, "prop_checkpattern", text="")
         # 要素行を作成する
-        line_row = draw_layout.row()
-        # ポリゴン数削減を実行するボタンを配置する
-        line_row.operator(ADDON_OPERATOR_IDNAME)
+        bottun_row = draw_layout.row()
+        # メッシュ削除を実行するボタンを配置する
+        bottun_row.operator(ADDON_OPERATOR_IDNAME)
 
 # Operatorクラスの作成
 # 参考URL:https://docs.blender.org/api/current/bpy.types.Operator.html
@@ -131,6 +144,22 @@ class HOLOMON_PROP_holomon_delete_object_byvolume(PropertyGroup):
                 target_objectlist.append(obj)
         # オブジェクトリストのオブジェクトを選択状態にする
         select_objectlist(target_objectlist)
+    # 正規表現指定の更新時に実行する関数を定義する
+    def change_checkpattern(self, context):
+        # 最初に全てのオブジェクトの選択状態を解除する
+        clear_select_object()
+        # 指定された体積を取得する
+        check_pattern = context.scene.holomon_delete_object_byvolume.prop_checkpattern
+        # 処理対象のオブジェクトリストを作成する
+        target_objectlist = list()
+        for obj in bpy.context.scene.objects:
+            if obj.type != 'MESH':
+                continue
+            # オブジェクト名が指定の正規表現と一致するか
+            if re.fullmatch(check_pattern, obj.name):
+                target_objectlist.append(obj)
+        # オブジェクトリストのオブジェクトを選択状態にする
+        select_objectlist(target_objectlist)
 
     # シーン上のパネルに表示する最大体積指定用のカスタムプロパティを定義する
     prop_targetmaxvolume: FloatProperty(
@@ -138,6 +167,13 @@ class HOLOMON_PROP_holomon_delete_object_byvolume(PropertyGroup):
         default=0,                                                              # デフォルト値
         description = "削除対象として選択するオブジェクトの体積の上限値を指定します", # 説明文
         update = change_targetmaxvolume,                                        # 更新時実行関数
+    )
+    # シーン上のパネルに表示する正規表現指定用のカスタムプロパティを定義する
+    prop_checkpattern: StringProperty(
+        name = "指定オブジェクト名の正規表現",                                     # プロパティ名
+        default="",                                                              # デフォルト値
+        description = "オブジェクト名の完全一致する正規表現を指定します",            # 説明文
+        update = change_checkpattern,                                           # 更新時実行関数
     )
 
 
